@@ -45,7 +45,6 @@ mysqlclient==2.2.7
 openai==0.28.0
 platformdirs==4.3.8
 propcache==0.3.2
-PyAudio==0.2.14
 pydantic==2.11.7
 pydantic_core==2.33.2
 pyjokes==0.8.3

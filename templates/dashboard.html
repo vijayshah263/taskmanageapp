@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Hello, {{ session.username }}</h2>
+
+<div class="alert alert-info">Total Tasks: {{ total }}</div>
+<div class="alert alert-success">Completed: {{ completed }}</div>
+<div class="alert alert-warning">Pending: {{ pending }}</div>
+
+{% if overdue > 0 %}
+  <div class="alert alert-danger">You have {{ overdue }} overdue task(s)!</div>
+{% endif %}
+
+{% if today %}
+  <div class="alert alert-info">Tasks due today:</div>
+  <ul>
+    {% for t in today %}
+    <li>{{ t.title }} ({{ t.category }})</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+<a class="btn btn-outline-primary mt-3" href="/tasks">Manage Tasks</a>
+<a class="btn btn-outline-danger mt-3" href="/logout">Logout</a>
+{% endblock %}

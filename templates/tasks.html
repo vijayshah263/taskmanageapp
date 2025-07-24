@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Task List</h2>
+<form method="POST">
+  <input class="form-control" name="title" placeholder="Task title" required>
+  <select class="form-select mt-2" name="category">
+    <option>Work</option>
+    <option>Personal</option>
+  </select>
+  <input class="form-control mt-2" type="date" name="deadline" required>
+  <button class="btn btn-primary mt-2" type="submit">Add Task</button>
+</form>
+
+<ul class="list-group mt-4" id="taskList">
+  {% for task in tasks %}
+  <li class="list-group-item d-flex justify-content-between align-items-center" draggable="true" data-id="{{ task.id }}">
+    <form method="POST" action="/update_task/{{ task.id }}" class="d-flex w-100 gap-2 align-items-center">
+      <span class="drag-handle" tabindex="0" role="button"><i class="fa-solid fa-grip-vertical"></i></span>
+      <input class="form-control" name="title" value="{{ task.title }}">
+      <select class="form-select" name="category">
+        <option {% if task.category == 'Work' %}selected{% endif %}>Work</option>
+        <option {% if task.category == 'Personal' %}selected{% endif %}>Personal</option>
+      </select>
+      <input class="form-control" type="date" name="deadline" value="{{ task.deadline }}">
+      <input class="form-check-input" type="checkbox" name="is_completed" {% if task.is_completed %}checked{% endif %}>
+      <button class="btn btn-success btn-sm" type="submit"><i class="fa fa-check"></i></button>
+      <a class="btn btn-danger btn-sm" href="/delete_task/{{ task.id }}"><i class="fa fa-trash"></i></a>
+    </form>
+  </li>
+  {% endfor %}
+</ul>
+
+<a href="/dashboard" class="btn btn-outline-secondary mt-3">Back to Dashboard</a>
+
+<script>
+const list = document.getElementById('taskList');
+let dragSrcEl = null;
+let lastOrder = [];
+
+function recordOrder(){
+  lastOrder = Array.from(list.children).map(li => li.dataset.id);
+}
+
+list.addEventListener('dragstart', function(e){
+  dragSrcEl = e.target;
+  e.target.classList.add('dragging');
+  recordOrder();
+});
+
+list.addEventListener('dragend', function(e){
+  e.target.classList.remove('dragging');
+});
+
+list.addEventListener('dragover', function(e){
+  e.preventDefault();
+  const afterEl = [...list.children].find(el => e.clientY < el.getBoundingClientRect().top + el.clientHeight / 2);
+  if (afterEl && afterEl !== dragSrcEl) {
+    list.insertBefore(dragSrcEl, afterEl);
+  }
+});
+
+list.addEventListener('drop', function(){
+  const newOrder = Array.from(list.children).map(li => li.dataset.id);
+  fetch('/reorder_tasks', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ order: newOrder })
+  });
+});
+</script>
+{% endblock %}
